@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IUserService {
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
 
 
 
@@ -50,7 +50,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
        /* 3.保存验证码到session
         session.setAttribute("code",code );*/
         //3.保存验证码到redis
-        redisTemplate.opsForValue().set(RedisConstants.LOGIN_CODE_KEY +phone,code,RedisConstants.LOGIN_CODE_TTL, TimeUnit.MINUTES);
+        stringRedisTemplate.opsForValue().set(RedisConstants.LOGIN_CODE_KEY +phone,code,RedisConstants.LOGIN_CODE_TTL, TimeUnit.MINUTES);
 
 
         //4.发送验证码
@@ -73,7 +73,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return Result.fail("验证码不合规");
         }*/
         //1.code是否和redis中的code匹配
-        String code = redisTemplate.opsForValue().get(RedisConstants.LOGIN_CODE_KEY + loginForm.getPhone());
+        String code = stringRedisTemplate.opsForValue().get(RedisConstants.LOGIN_CODE_KEY + loginForm.getPhone());
 
 
         //2.匹配失败则返回fail
@@ -95,15 +95,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         //5. 将用户的信息放到redis中
 
         String token=randomLetters();
-        redisTemplate.opsForHash().put(RedisConstants.LOGIN_USER_KEY+token,"id",userDTO.getId().toString());
-        redisTemplate.opsForHash().put(RedisConstants.LOGIN_USER_KEY+token,"nickName",userDTO.getNickName());
-        redisTemplate.opsForHash().put(RedisConstants.LOGIN_USER_KEY+token,"icon",userDTO.getIcon());
+        stringRedisTemplate.opsForHash().put(RedisConstants.LOGIN_USER_KEY+token,"id",userDTO.getId().toString());
+        stringRedisTemplate.opsForHash().put(RedisConstants.LOGIN_USER_KEY+token,"nickName",userDTO.getNickName());
+        stringRedisTemplate.opsForHash().put(RedisConstants.LOGIN_USER_KEY+token,"icon",userDTO.getIcon());
 
 
         //6.返回success
         //log.debug("login sessionId={}", session.getId());
         //7.设置有效期
-        redisTemplate.expire(RedisConstants.LOGIN_USER_KEY+token,RedisConstants.LOGIN_USER_TTL,TimeUnit.MINUTES);
+        stringRedisTemplate.expire(RedisConstants.LOGIN_USER_KEY+token,RedisConstants.LOGIN_USER_TTL,TimeUnit.MINUTES);
 
         return Result.ok(token);
     }
