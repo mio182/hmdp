@@ -71,7 +71,7 @@ public class CacheClient {
 
         }
         //存在则将店铺信息写入redis
-        setJsonWithLogicExpireTime(key,r,time,timeUnit);
+        setJsonWithTTL(key,r,time,timeUnit);
 
         return r;
     }
